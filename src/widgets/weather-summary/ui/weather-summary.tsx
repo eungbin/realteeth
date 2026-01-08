@@ -50,7 +50,6 @@ export function WeatherSummary(props: WeatherSummaryProps) {
           <div className="text-5xl font-semibold tracking-tight">
             {formatTempC(props.weather.tempNowC)}
           </div>
-          <div className="text-sm text-slate-500">현재 기온</div>
         </div>
       ) : null}
     </section>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { useCurrentPosition } from '@/features/detect-location'
+import { FavoritesCard, useFavorites, useFavoriteWeathers } from '@/features/favorites'
 import type { SelectedPlace } from '@/features/place-search'
 import { PlaceSearchCard } from '@/features/place-search'
 import { useWeatherByLatLon } from '@/entities/weather'
@@ -9,7 +10,10 @@ import { WeatherSummary } from '@/widgets/weather-summary'
 
 export function HomePage() {
   const [selectedPlace, setSelectedPlace] = useState<SelectedPlace | null>(null)
+  const [favMessage, setFavMessage] = useState<string | null>(null)
   const pos = useCurrentPosition()
+  const favorites = useFavorites()
+  const { weatherById } = useFavoriteWeathers({ items: favorites.items })
 
   const coords =
     selectedPlace ??
@@ -30,6 +34,9 @@ export function HomePage() {
     enabled: typeof coords?.lat === 'number' && typeof coords?.lon === 'number',
   })
 
+  const canFavorite = typeof coords?.lat === 'number' && typeof coords?.lon === 'number'
+  const isAlreadyFavorite = canFavorite ? favorites.isFavorite(coords.lat, coords.lon) : false
+
   return (
     <section className="space-y-6">
       <div>
@@ -42,7 +49,46 @@ export function HomePage() {
       <PlaceSearchCard
         value={selectedPlace}
         onSelect={(p) => setSelectedPlace(p)}
-        onClear={() => setSelectedPlace(null)}
+        onClear={() => {
+          setSelectedPlace(null)
+          setFavMessage(null)
+        }}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          disabled={!canFavorite || isAlreadyFavorite || favorites.items.length >= favorites.limit}
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+          onClick={() => {
+            setFavMessage(null)
+            if (!canFavorite) return
+            const res = favorites.add({ placeName, lat: coords.lat, lon: coords.lon })
+            if (res.ok) {
+              setFavMessage('즐겨찾기에 추가했습니다.')
+              return
+            }
+            if (res.reason === 'limit') setFavMessage('즐겨찾기는 최대 6개까지 추가할 수 있어요.')
+            else if (res.reason === 'duplicate') setFavMessage('이미 즐겨찾기에 있습니다.')
+            else setFavMessage('즐겨찾기 저장에 실패했습니다.')
+          }}
+        >
+          즐겨찾기 추가
+        </button>
+        {favMessage ? <div className="text-xs text-slate-600">{favMessage}</div> : null}
+      </div>
+
+      <FavoritesCard
+        items={favorites.items}
+        onSelect={(p) => {
+          setSelectedPlace(p)
+          setFavMessage(null)
+        }}
+        onRemove={(id) => {
+          favorites.remove(id)
+          setFavMessage(null)
+        }}
+        weatherById={weatherById}
       />
 
       {selectedPlace ? (
@@ -115,14 +161,7 @@ export function HomePage() {
         </>
       )}
 
-      <div className="grid gap-4 grid-cols-1">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="text-sm font-medium text-slate-700">즐겨찾기(다음 단계)</div>
-          <div className="mt-2 text-slate-500">
-            최대 6개 카드 등록 후, 각 카드에서 현재/최저/최고를 보여주고 상세로 이동합니다.
-          </div>
-        </div>
-      </div>
+      {/* 즐겨찾기 카드/기능을 위에서 구현 */}
     </section>
   )
 }

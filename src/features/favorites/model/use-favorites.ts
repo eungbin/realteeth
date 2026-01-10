@@ -7,6 +7,10 @@ export type AddFavoriteResult =
   | { ok: true; item: FavoritePlace }
   | { ok: false; reason: 'limit' | 'duplicate' | 'storage' }
 
+export type RenameFavoriteResult =
+  | { ok: true; item: FavoritePlace }
+  | { ok: false; reason: 'empty' | 'storage' }
+
 export function useFavorites() {
   const [items, setItems] = useState<FavoritePlace[]>(() => loadFavorites())
 
@@ -68,7 +72,27 @@ export function useFavorites() {
     [items],
   )
 
-  return { items, add, remove, isFavorite, limit: FAVORITES_LIMIT }
+  const rename = useCallback(
+    (id: string, nextPlaceName: string): RenameFavoriteResult => {
+      const placeName = nextPlaceName.trim()
+      if (!placeName) return { ok: false, reason: 'empty' }
+
+      const existing = items.find((i) => i.id === id)
+      if (!existing) return { ok: false, reason: 'storage' }
+
+      const next = items.map((i) => (i.id === id ? { ...i, placeName } : i))
+      try {
+        saveFavorites(next)
+        setItems(next)
+        return { ok: true, item: { ...existing, placeName } }
+      } catch {
+        return { ok: false, reason: 'storage' }
+      }
+    },
+    [items],
+  )
+
+  return { items, add, remove, rename, isFavorite, limit: FAVORITES_LIMIT }
 }
 
 

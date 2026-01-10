@@ -198,6 +198,13 @@ export function HomePage() {
           favorites.remove(id)
           setFavMessage(null)
         }}
+        onRename={(id, nextPlaceName) => {
+          setFavMessage(null)
+          const res = favorites.rename(id, nextPlaceName)
+          if (res.ok) setFavMessage('이름을 변경했습니다.')
+          else if (res.reason === 'empty') setFavMessage('이름은 비워둘 수 없어요.')
+          else setFavMessage('이름 변경에 실패했습니다.')
+        }}
         weatherById={weatherById}
       />
     </section>

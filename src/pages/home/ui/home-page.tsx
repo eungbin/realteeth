@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { useCurrentPosition } from '@/features/detect-location'
 import { FavoritesCard, useFavorites, useFavoriteWeathers } from '@/features/favorites'
+import { makePlaceId } from '@/features/favorites/model/storage'
 import type { SelectedPlace } from '@/features/place-search'
 import { PlaceSearchCard } from '@/features/place-search'
 import { useWeatherByLatLon } from '@/entities/weather'
@@ -36,6 +37,7 @@ export function HomePage() {
 
   const canFavorite = typeof coords?.lat === 'number' && typeof coords?.lon === 'number'
   const isAlreadyFavorite = canFavorite ? favorites.isFavorite(coords.lat, coords.lon) : false
+  const favoriteId = canFavorite ? makePlaceId(coords.lat, coords.lon) : null
 
   return (
     <section className="space-y-6">
@@ -53,42 +55,6 @@ export function HomePage() {
           setSelectedPlace(null)
           setFavMessage(null)
         }}
-      />
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          disabled={!canFavorite || isAlreadyFavorite || favorites.items.length >= favorites.limit}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
-          onClick={() => {
-            setFavMessage(null)
-            if (!canFavorite) return
-            const res = favorites.add({ placeName, lat: coords.lat, lon: coords.lon })
-            if (res.ok) {
-              setFavMessage('즐겨찾기에 추가했습니다.')
-              return
-            }
-            if (res.reason === 'limit') setFavMessage('즐겨찾기는 최대 6개까지 추가할 수 있어요.')
-            else if (res.reason === 'duplicate') setFavMessage('이미 즐겨찾기에 있습니다.')
-            else setFavMessage('즐겨찾기 저장에 실패했습니다.')
-          }}
-        >
-          즐겨찾기 추가
-        </button>
-        {favMessage ? <div className="text-xs text-slate-600">{favMessage}</div> : null}
-      </div>
-
-      <FavoritesCard
-        items={favorites.items}
-        onSelect={(p) => {
-          setSelectedPlace(p)
-          setFavMessage(null)
-        }}
-        onRemove={(id) => {
-          favorites.remove(id)
-          setFavMessage(null)
-        }}
-        weatherById={weatherById}
       />
 
       {selectedPlace ? (
@@ -109,7 +75,37 @@ export function HomePage() {
 
           {weatherQuery.data ? (
             <>
-              <WeatherSummary status="success" title="검색한 장소" weather={{ ...weatherQuery.data, placeName }} />
+              <WeatherSummary
+                status="success"
+                title="검색한 장소"
+                weather={{ ...weatherQuery.data, placeName }}
+                placeAction={
+                  <button
+                    type="button"
+                    disabled={!canFavorite || favorites.items.length >= favorites.limit}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                    aria-pressed={isAlreadyFavorite}
+                    aria-label={`${placeName} 즐겨찾기 ${isAlreadyFavorite ? '해제' : '추가'}`}
+                    title={isAlreadyFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                    onClick={() => {
+                      setFavMessage(null)
+                      if (!canFavorite || !favoriteId) return
+                      if (isAlreadyFavorite) {
+                        favorites.remove(favoriteId)
+                        setFavMessage('즐겨찾기에서 제거했습니다.')
+                        return
+                      }
+                      const res = favorites.add({ placeName, lat: coords.lat, lon: coords.lon })
+                      if (res.ok) setFavMessage('즐겨찾기에 추가했습니다.')
+                      else if (res.reason === 'limit') setFavMessage('즐겨찾기는 최대 6개까지 추가할 수 있어요.')
+                      else if (res.reason === 'duplicate') setFavMessage('이미 즐겨찾기에 있습니다.')
+                      else setFavMessage('즐겨찾기 저장에 실패했습니다.')
+                    }}
+                  >
+                    <span aria-hidden="true">{isAlreadyFavorite ? '★' : '☆'}</span>
+                  </button>
+                }
+              />
               <WeatherHourly status="success" points={weatherQuery.data.hourlyToday} />
             </>
           ) : null}
@@ -152,7 +148,37 @@ export function HomePage() {
 
               {weatherQuery.data ? (
                 <>
-                  <WeatherSummary status="success" title="현재 위치" weather={{ ...weatherQuery.data, placeName }} />
+                  <WeatherSummary
+                    status="success"
+                    title="현재 위치"
+                    weather={{ ...weatherQuery.data, placeName }}
+                    placeAction={
+                      <button
+                        type="button"
+                        disabled={!canFavorite || favorites.items.length >= favorites.limit}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                        aria-pressed={isAlreadyFavorite}
+                        aria-label={`${placeName} 즐겨찾기 ${isAlreadyFavorite ? '해제' : '추가'}`}
+                        title={isAlreadyFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                        onClick={() => {
+                          setFavMessage(null)
+                          if (!canFavorite || !favoriteId) return
+                          if (isAlreadyFavorite) {
+                            favorites.remove(favoriteId)
+                            setFavMessage('즐겨찾기에서 제거했습니다.')
+                            return
+                          }
+                          const res = favorites.add({ placeName, lat: coords.lat, lon: coords.lon })
+                          if (res.ok) setFavMessage('즐겨찾기에 추가했습니다.')
+                          else if (res.reason === 'limit') setFavMessage('즐겨찾기는 최대 6개까지 추가할 수 있어요.')
+                          else if (res.reason === 'duplicate') setFavMessage('이미 즐겨찾기에 있습니다.')
+                          else setFavMessage('즐겨찾기 저장에 실패했습니다.')
+                        }}
+                      >
+                        <span aria-hidden="true">{isAlreadyFavorite ? '★' : '☆'}</span>
+                      </button>
+                    }
+                  />
                   <WeatherHourly status="success" points={weatherQuery.data.hourlyToday} />
                 </>
               ) : null}
@@ -161,7 +187,19 @@ export function HomePage() {
         </>
       )}
 
-      {/* 즐겨찾기 카드/기능을 위에서 구현 */}
+      <FavoritesCard
+        items={favorites.items}
+        headerMessage={favMessage}
+        onSelect={(p) => {
+          setSelectedPlace(p)
+          setFavMessage(null)
+        }}
+        onRemove={(id) => {
+          favorites.remove(id)
+          setFavMessage(null)
+        }}
+        weatherById={weatherById}
+      />
     </section>
   )
 }

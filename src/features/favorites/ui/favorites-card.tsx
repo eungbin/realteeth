@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import type { FavoritePlace } from '../model/types'
 import type { FavoriteWeatherSummaryState } from '../model/weather-summary'
 
@@ -5,6 +7,8 @@ import { formatTempC } from '@/shared/lib/format'
 
 type FavoritesCardProps = {
   items: FavoritePlace[]
+  headerAction?: ReactNode
+  headerMessage?: ReactNode
   /**
    * 즐겨찾기 항목별 "요약 날씨" 표시용 데이터(조회 로직은 외부에서 주입)
    * - key: FavoritePlace.id
@@ -22,8 +26,12 @@ export function FavoritesCard(props: FavoritesCardProps) {
           <div className="text-sm font-medium text-slate-700">즐겨찾기</div>
           <div className="mt-1 text-sm text-slate-500">최대 6개까지 저장할 수 있어요.</div>
         </div>
-        <div className="text-xs text-slate-500">{props.items.length} / 6</div>
+        <div className="flex flex-col items-end gap-2">
+          {props.headerAction ? <div>{props.headerAction}</div> : null}
+          <div className="text-xs text-slate-500">{props.items.length} / 6</div>
+        </div>
       </div>
+      {props.headerMessage ? <div className="mt-2 text-xs text-slate-600">{props.headerMessage}</div> : null}
 
       {props.items.length === 0 ? (
         <div className="mt-4 text-sm text-slate-600">아직 즐겨찾기가 없습니다.</div>

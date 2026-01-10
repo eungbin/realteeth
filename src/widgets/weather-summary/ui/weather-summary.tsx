@@ -2,11 +2,20 @@ import type { WeatherView } from '@/entities/weather'
 
 import { formatTempC } from '@/shared/lib/format'
 
-type WeatherSummaryProps =
-  | { status: 'loading'; title: string }
-  | { status: 'error'; title: string; message: string }
-  | { status: 'empty'; title: string; message: string }
-  | { status: 'success'; title: string; weather: WeatherView }
+import type React from 'react'
+
+type WeatherSummaryBaseProps = {
+  title: string
+  placeAction?: React.ReactNode
+}
+
+type WeatherSummaryProps = WeatherSummaryBaseProps &
+  (
+    | { status: 'loading' }
+    | { status: 'error'; message: string }
+    | { status: 'empty'; message: string }
+    | { status: 'success'; weather: WeatherView }
+  )
 
 /**
  * 날씨 요약 카드
@@ -20,9 +29,6 @@ export function WeatherSummary(props: WeatherSummaryProps) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-sm font-medium text-slate-700">{props.title}</div>
-          {'weather' in props ? (
-            <div className="mt-1 text-sm text-slate-500">{props.weather.placeName}</div>
-          ) : null}
         </div>
         {'weather' in props ? (
           <div className="text-right text-sm text-slate-500">
@@ -33,6 +39,14 @@ export function WeatherSummary(props: WeatherSummaryProps) {
           </div>
         ) : null}
       </div>
+      {'weather' in props ? (
+        <div className="mt-1 flex items-center justify-between gap-3 text-sm text-slate-500">
+          <div className="min-w-0 flex-1 truncate" title={props.weather.placeName}>
+            {props.weather.placeName}
+          </div>
+          {props.placeAction ? <div className="shrink-0">{props.placeAction}</div> : null}
+        </div>
+      ) : null}
 
       {props.status === 'loading' ? (
         <div className="mt-6 animate-pulse">

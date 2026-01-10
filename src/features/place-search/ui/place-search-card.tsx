@@ -73,7 +73,7 @@ export function PlaceSearchCard(props: PlaceSearchCardProps) {
         {props.value ? (
           <button
             type="button"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
             onClick={() => props.onClear?.()}
             aria-label="현재 위치로"
           >
@@ -155,7 +155,7 @@ export function PlaceSearchCard(props: PlaceSearchCardProps) {
                     <button
                       type="button"
                       className={
-                        'flex w-full items-center justify-between px-4 py-3 text-left text-sm ' +
+                        'flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left text-sm ' +
                         (active
                           ? 'bg-slate-50 text-slate-900'
                           : 'bg-white text-slate-800 hover:bg-slate-50')

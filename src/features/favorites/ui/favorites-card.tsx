@@ -70,7 +70,7 @@ export function FavoritesCard(props: FavoritesCardProps) {
                     />
                     <button
                       type="submit"
-                      className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                      className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
                       disabled={!draftName.trim()}
                       title="저장"
                     >
@@ -78,7 +78,7 @@ export function FavoritesCard(props: FavoritesCardProps) {
                     </button>
                     <button
                       type="button"
-                      className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                      className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                       onClick={() => {
                         setEditingId(null)
                         setDraftName('')
@@ -92,7 +92,7 @@ export function FavoritesCard(props: FavoritesCardProps) {
                   <>
                     <button
                       type="button"
-                      className="min-w-0 flex-1 truncate text-left text-sm font-medium text-slate-900 hover:underline"
+                      className="min-w-0 flex-1 cursor-pointer truncate text-left text-sm font-medium text-slate-900 hover:underline"
                       onClick={() => props.onSelect({ placeName: it.placeName, lat: it.lat, lon: it.lon })}
                       title={it.placeName}
                     >
@@ -101,7 +101,7 @@ export function FavoritesCard(props: FavoritesCardProps) {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                        className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                         onClick={() => {
                           setEditingId(it.id)
                           setDraftName(it.placeName)
@@ -113,7 +113,7 @@ export function FavoritesCard(props: FavoritesCardProps) {
                       </button>
                       <button
                         type="button"
-                        className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+                        className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                         onClick={() => props.onRemove(it.id)}
                         aria-label={`${it.placeName} 삭제`}
                         title="삭제"

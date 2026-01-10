@@ -16,6 +16,11 @@ export function HomePage() {
   const favorites = useFavorites()
   const { weatherById } = useFavoriteWeathers({ items: favorites.items })
 
+  // 테스트/디버깅용: 검색한 장소 날씨 상태 강제
+  // 예) ?debugSearchWeather=empty
+  const debugSearchWeather =
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('debugSearchWeather') : null
+
   const coords =
     selectedPlace ??
     (pos.status === 'success' ? { lat: pos.coords.lat, lon: pos.coords.lon, placeName: '현재 위치' } : null)
@@ -38,6 +43,7 @@ export function HomePage() {
   const canFavorite = typeof coords?.lat === 'number' && typeof coords?.lon === 'number'
   const isAlreadyFavorite = canFavorite ? favorites.isFavorite(coords.lat, coords.lon) : false
   const favoriteId = canFavorite ? makePlaceId(coords.lat, coords.lon) : null
+  const forceSearchEmpty = Boolean(selectedPlace && debugSearchWeather === 'empty')
 
   return (
     <section className="space-y-6">
@@ -59,21 +65,21 @@ export function HomePage() {
 
       {selectedPlace ? (
         <>
-          {weatherQuery.isLoading ? (
+          {weatherQuery.isLoading && !forceSearchEmpty ? (
             <>
               <WeatherSummary status="loading" title="검색한 장소" />
               <WeatherHourly status="loading" />
             </>
           ) : null}
 
-          {weatherQuery.isError ? (
+          {weatherQuery.isError || forceSearchEmpty ? (
             <>
               <WeatherSummary status="empty" title="검색한 장소" message="해당 장소의 정보가 제공되지 않습니다." />
               <WeatherHourly status="empty" message="해당 장소의 정보가 제공되지 않습니다." />
             </>
           ) : null}
 
-          {weatherQuery.data ? (
+          {weatherQuery.data && !forceSearchEmpty ? (
             <>
               <WeatherSummary
                 status="success"
@@ -83,7 +89,7 @@ export function HomePage() {
                   <button
                     type="button"
                     disabled={!canFavorite || favorites.items.length >= favorites.limit}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
                     aria-pressed={isAlreadyFavorite}
                     aria-label={`${placeName} 즐겨찾기 ${isAlreadyFavorite ? '해제' : '추가'}`}
                     title={isAlreadyFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
@@ -156,7 +162,7 @@ export function HomePage() {
                       <button
                         type="button"
                         disabled={!canFavorite || favorites.items.length >= favorites.limit}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
                         aria-pressed={isAlreadyFavorite}
                         aria-label={`${placeName} 즐겨찾기 ${isAlreadyFavorite ? '해제' : '추가'}`}
                         title={isAlreadyFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}

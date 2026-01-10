@@ -56,7 +56,7 @@ export function WeatherSummary(props: WeatherSummaryProps) {
       ) : null}
 
       {props.status === 'error' || props.status === 'empty' ? (
-        <div className="mt-6 text-sm text-slate-600">{props.message}</div>
+        <div className="mt-4 text-sm text-slate-600">{props.message}</div>
       ) : null}
 
       {props.status === 'success' ? (
